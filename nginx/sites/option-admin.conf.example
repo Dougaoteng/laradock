@@ -1,0 +1,75 @@
+server {
+
+    listen 80;
+
+    # For https
+    # listen 443 ssl default_server;
+    # listen [::]:443 ssl default_server ipv6only=on;
+    # ssl_certificate /etc/nginx/ssl/default.crt;
+    # ssl_certificate_key /etc/nginx/ssl/default.key;
+
+    root /var/www/option-admin;
+    index index.php  index.html index.htm;
+    server_name option-admin.fundusd.net;
+
+    access_log /var/log/nginx/option_admin_access.log;
+    error_log /var/log/nginx/option_admin_error.log debug;
+
+
+    location / {
+        client_max_body_size    100m;
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '$http_origin';
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT';
+            add_header 'Access-Control-Allow-Headers' 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Origin,Content-Type,Accept,Authorization';
+            # add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain charset=UTF-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+            # First attempt to serve request as file, then
+            # as directory, then fall back to displaying a 404.
+            #try_files $uri $uri/ /api.php$is_args$args;
+            # Uncomment to enable naxsi on this location
+            # include /etc/nginx/naxsi.rules
+            try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ /upload/.*\.pdf$ {
+        #add_header Content-Disposition "attachment;";
+        root /data/upload/option-back;
+        rewrite ^/upload/(.*)$ /$1 break;
+        add_header Content-Type "application/pdf";
+    }
+
+
+    location ~ /upload/ {
+        root /data/upload/option-back;
+        rewrite ^/upload/(.*)$ /$1 break;
+        add_header Content-Disposition "attachment;";
+    }
+
+
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        try_files $uri /index.php =404;
+        fastcgi_pass php-upstream;
+        fastcgi_index index.php;
+        fastcgi_buffers 16 16k;
+        fastcgi_buffer_size 32k;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        #fixes timeouts
+        fastcgi_read_timeout 600;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt/;
+        log_not_found off;
+    }
+}

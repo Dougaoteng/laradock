@@ -1224,6 +1224,8 @@ RUN if [ ${INSTALL_GNU_PARALLEL} = true ]; then \
   apt-get -y install parallel \
 ;fi
 
+RUN pecl install tidy
+
 
 ###########################################################################
 # Check PHP version:

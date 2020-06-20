@@ -143,6 +143,7 @@ services:
       volumes:
         - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}${APP_CODE_CONTAINER_FLAG}
         - ./php-worker/supervisord.d:/etc/supervisord.d
+        - ./php-fpm/php${PHP_VERSION}.ini:/etc/php/${PHP_VERSION}/cli/php.ini
       extra_hosts:
         - "dockerhost:${DOCKER_HOST_IP}"
       ports:
@@ -1660,5 +1661,5 @@ services:
       volumes:
         - ${DATA_PATH_HOST}/tomcat/webapps:/usr/local/tomcat/webapps
         - ${DATA_PATH_HOST}/tomcat/logs:/usr/local/tomcat/logs
-      # restart: always
+          #restart: always
 
